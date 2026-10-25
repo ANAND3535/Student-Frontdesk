@@ -1,0 +1,89 @@
+<template>
+    <main class="slds-p-around_large slds-container_medium">
+        <header class="slds-m-bottom_large">
+            <p class="slds-text-title_caps slds-text-color_weak">Help Center</p>
+            <h1 class="slds-text-heading_large slds-m-top_x-small">Frequently Asked Questions</h1>
+            <p class="slds-text-body_regular slds-m-top_small">
+                Search published answers by question or browse a category.
+            </p>
+        </header>
+
+        <lightning-input
+            type="search"
+            label="Search questions"
+            placeholder="Type a question"
+            onchange={handleSearchInput}
+        ></lightning-input>
+
+        <div class="slds-m-vertical_medium" role="group" aria-label="Filter FAQs by category">
+            <template for:each={categoryFilters} for:item="filter">
+                <button
+                    key={filter.value}
+                    class={filter.className}
+                    data-category={filter.value}
+                    aria-pressed={filter.selected}
+                    onclick={handleCategoryClick}
+                >
+                    {filter.label}
+                </button>
+            </template>
+        </div>
+
+        <template if:true={isLoading}>
+            <div class="slds-is-relative slds-p-vertical_large" role="status" aria-live="polite">
+                <lightning-spinner alternative-text="Loading FAQs" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:true={errorMessage}>
+            <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                <span>{errorMessage}</span>
+            </div>
+        </template>
+
+        <template if:true={hasFaqs}>
+            <ul class="slds-accordion">
+                <template for:each={visibleFaqs} for:item="faq">
+                    <li key={faq.id} class="slds-accordion__list-item slds-m-bottom_x-small">
+                        <section class="slds-accordion__section slds-is-open slds-box">
+                            <h2 class="slds-accordion__summary">
+                                <button
+                                    class="slds-button slds-button_reset slds-accordion__summary-action slds-size_1-of-1"
+                                    aria-expanded={faq.expanded}
+                                    aria-controls={faq.panelId}
+                                    data-id={faq.id}
+                                    onclick={handleToggle}
+                                >
+                                    <span class="slds-accordion__summary-content slds-text-heading_small">
+                                        {faq.question}
+                                    </span>
+                                    <lightning-icon
+                                        icon-name={faq.iconName}
+                                        size="x-small"
+                                        alternative-text={faq.toggleLabel}
+                                    ></lightning-icon>
+                                </button>
+                            </h2>
+                            <template if:true={faq.expanded}>
+                                <div
+                                    id={faq.panelId}
+                                    class="slds-accordion__content slds-p-top_medium"
+                                    aria-label="Answer"
+                                >
+                                    <lightning-formatted-rich-text value={faq.answer}></lightning-formatted-rich-text>
+                                </div>
+                            </template>
+                        </section>
+                    </li>
+                </template>
+            </ul>
+        </template>
+
+        <template if:true={showEmpty}>
+            <div class="slds-box slds-theme_shade slds-text-align_center slds-p-around_large" role="status">
+                <p class="slds-text-heading_small">No FAQs found</p>
+                <p class="slds-m-top_x-small">Try a different search or category.</p>
+            </div>
+        </template>
+    </main>
+</template>

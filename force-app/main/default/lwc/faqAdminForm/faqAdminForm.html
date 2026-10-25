@@ -1,0 +1,92 @@
+<template>
+    <section
+        class="slds-modal slds-fade-in-open"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="faq-form-title"
+    >
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <lightning-button-icon
+                    icon-name="utility:close"
+                    alternative-text="Close"
+                    title="Close"
+                    variant="bare-inverse"
+                    class="slds-modal__close"
+                    onclick={handleCancel}
+                ></lightning-button-icon>
+                <h2 id="faq-form-title" class="slds-text-heading_medium">
+                    {modalTitle}
+                </h2>
+            </header>
+
+            <div class="slds-modal__content slds-p-around_medium">
+                <template if:true={errorMessage}>
+                    <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                        {errorMessage}
+                    </div>
+                </template>
+                <lightning-input
+                    label="Question"
+                    name="question"
+                    value={formData.Question__c}
+                    maxlength="255"
+                    required
+                    onchange={handleQuestionChange}
+                ></lightning-input>
+                <lightning-input-rich-text
+                    class="slds-m-top_medium"
+                    label="Answer"
+                    name="answer"
+                    value={formData.Answer__c}
+                    required
+                    onchange={handleAnswerChange}
+                ></lightning-input-rich-text>
+                <div class="slds-grid slds-wrap slds-gutters slds-m-top_medium">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-combobox
+                            label="Category"
+                            name="category"
+                            value={formData.Category__c}
+                            options={categoryOptions}
+                            onchange={handleCategoryChange}
+                        ></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            type="number"
+                            label="Display Order"
+                            name="displayOrder"
+                            value={formData.Display_Order__c}
+                            min="0"
+                            max="99999"
+                            step="1"
+                            onchange={handleDisplayOrderChange}
+                        ></lightning-input>
+                    </div>
+                </div>
+                <lightning-input
+                    class="slds-m-top_medium"
+                    type="toggle"
+                    label="Published"
+                    message-toggle-active="Published"
+                    message-toggle-inactive="Draft"
+                    checked={formData.Is_Published__c}
+                    onchange={handlePublishedChange}
+                ></lightning-input>
+            </div>
+
+            <footer class="slds-modal__footer">
+                <lightning-button label="Cancel" onclick={handleCancel} disabled={isSaving}></lightning-button>
+                <lightning-button
+                    class="slds-m-left_small"
+                    label="Save FAQ"
+                    variant="brand"
+                    onclick={handleSave}
+                    disabled={isSaving}
+                ></lightning-button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+</template>
