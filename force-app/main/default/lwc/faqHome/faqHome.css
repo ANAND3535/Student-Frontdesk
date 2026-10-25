@@ -1,0 +1,13 @@
+.card-copy {
+    display: block;
+    margin-left: 1.5rem;
+}
+
+.card-title,
+.card-description {
+    display: block;
+}
+
+.card-description {
+    margin-top: 0.5rem;
+}
