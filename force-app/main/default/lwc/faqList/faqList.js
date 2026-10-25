@@ -16,6 +16,7 @@ export default class FaqList extends LightningElement {
 
     connectedCallback() {
         this.loadFaqs();
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
         this.refreshTimer = window.setInterval(() => this.loadFaqs(), REFRESH_INTERVAL);
         document.addEventListener('visibilitychange', this.handleVisibilityChange);
     }
@@ -65,6 +66,7 @@ export default class FaqList extends LightningElement {
     handleSearchInput(event) {
         this.pendingSearchTerm = event.target.value || '';
         window.clearTimeout(this.searchTimer);
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
         this.searchTimer = window.setTimeout(() => {
             this.searchTerm = this.pendingSearchTerm.trim();
         }, SEARCH_DELAY);
@@ -76,9 +78,12 @@ export default class FaqList extends LightningElement {
 
     handleToggle(event) {
         const faqId = event.currentTarget.dataset.id;
-        this.faqs = this.faqs.map((faq) =>
-            faq.id === faqId ? { ...faq, expanded: !faq.expanded } : faq
-        );
+        this.faqs = this.faqs.map((faq) => {
+            if (faq.id === faqId) {
+                return { ...faq, expanded: !faq.expanded };
+            }
+            return faq;
+        });
     }
 
     handleVisibilityChange = () => {

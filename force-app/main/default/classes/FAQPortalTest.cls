@@ -38,7 +38,7 @@ private class FAQPortalTest {
         };
 
         Test.startTest();
-        List<FAQPublicController.FAQDto> publicFaqs =
+        List<FAQDto> publicFaqs =
             FAQPublicController.getPublishedFaqs();
         Test.stopTest();
 
@@ -55,7 +55,7 @@ private class FAQPortalTest {
             System.assert(FAQAdminController.isAdmin());
             System.assertEquals(5, FAQAdminController.getCategoryValues().size());
 
-            FAQAdminController.FAQSaveResult saved = FAQAdminController.saveFaq(
+            FAQSaveResult saved = FAQAdminController.saveFaq(
                 new FAQ__c(
                     Question__c = '  How do I update my profile?  ',
                     Answer__c = '<p>Use settings.</p>',
@@ -67,6 +67,12 @@ private class FAQPortalTest {
             System.assertEquals('How do I update my profile?', saved.faq.Question__c);
             System.assertEquals(1, FAQAdminController.getAllFaqs('profile').size());
             System.assertEquals(1, FAQAdminController.getAllFaqs(null).size());
+
+            saved.faq.Question__c = 'How do I change my profile?';
+            FAQSaveResult updated =
+                FAQAdminController.saveFaq(saved.faq);
+            System.assertEquals('How do I change my profile?', updated.faq.Question__c);
+            System.assertEquals(0, FAQAdminController.getAllFaqs('no matching question').size());
 
             FAQAdminController.setPublished(saved.faq.Id, true);
             System.assertEquals(1, FAQPublicController.getPublishedFaqs().size());
@@ -83,7 +89,7 @@ private class FAQPortalTest {
         insert faq('Where is my invoice?', '<p>Check Billing.</p>', 'Billing', false, 100);
         User adminUser = getUser('faqadmin');
         System.runAs(adminUser) {
-            FAQAdminController.FAQSaveResult duplicate = FAQAdminController.saveFaq(
+            FAQSaveResult duplicate = FAQAdminController.saveFaq(
                 new FAQ__c(
                     Question__c = 'WHERE IS MY INVOICE?',
                     Answer__c = '<p>Contact Billing.</p>',
@@ -109,15 +115,15 @@ private class FAQPortalTest {
     static void importPartiallyInsertsAndReportsRowErrors() {
         User adminUser = getUser('faqadmin');
         System.runAs(adminUser) {
-            List<FAQAdminController.FaqRow> rows =
-                new List<FAQAdminController.FaqRow>();
+            List<FaqRow> rows =
+                new List<FaqRow>();
             rows.add(importRow('How do I sign in?', '<p>Use your email.</p>', 'General'));
             rows.add(importRow('How can I pay?', '<p>Pay online.</p>', 'Billing'));
             rows.add(importRow(' ', '<p>Missing question.</p>', 'General'));
             rows.add(importRow('Whitespace answer?', '<p>&nbsp;</p>', 'General'));
 
             Test.startTest();
-            FAQAdminController.ImportResult result =
+            FAQImportResult result =
                 FAQAdminController.importFaqs(rows);
             Test.stopTest();
 
@@ -133,13 +139,13 @@ private class FAQPortalTest {
         insert faq('Where do I find receipts?', '<p>In Billing.</p>', 'Billing', false, 100);
         User adminUser = getUser('faqadmin');
         System.runAs(adminUser) {
-            List<FAQAdminController.FaqRow> rows =
-                new List<FAQAdminController.FaqRow>();
+            List<FaqRow> rows =
+                new List<FaqRow>();
             rows.add(importRow('WHERE DO I FIND RECEIPTS?', '<p>Billing.</p>', 'Billing'));
             rows.add(importRow('How do I reset access?', '<p>Use the reset link.</p>', 'Account'));
             rows.add(importRow('HOW DO I RESET ACCESS?', '<p>Try the link.</p>', 'Account'));
 
-            FAQAdminController.ImportResult result =
+            FAQImportResult result =
                 FAQAdminController.importFaqs(rows);
 
             System.assertEquals(3, result.inserted);
@@ -162,11 +168,65 @@ private class FAQPortalTest {
 
             Boolean emptyRejected = false;
             try {
-                FAQAdminController.importFaqs(new List<FAQAdminController.FaqRow>());
+                FAQAdminController.importFaqs(new List<FaqRow>());
             } catch (AuraHandledException error) {
                 emptyRejected = true;
             }
             System.assert(emptyRejected);
+        }
+    }
+
+    @IsTest
+    static void administratorInvalidInputsAreReported() {
+        User adminUser = getUser('faqadmin');
+        System.runAs(adminUser) {
+            Boolean publishRejected = false;
+            try {
+                FAQAdminController.setPublished(null, true);
+            } catch (AuraHandledException error) {
+                publishRejected = true;
+            }
+            System.assert(publishRejected);
+
+            Boolean deleteRejected = false;
+            try {
+                FAQAdminController.deleteFaq(null);
+            } catch (AuraHandledException error) {
+                deleteRejected = true;
+            }
+            System.assert(deleteRejected);
+
+            Boolean nullImportRejected = false;
+            try {
+                FAQAdminController.importFaqs(null);
+            } catch (AuraHandledException error) {
+                nullImportRejected = true;
+            }
+            System.assert(nullImportRejected);
+
+            List<FaqRow> tooManyRows =
+                new List<FaqRow>();
+            for (Integer indexValue = 0; indexValue < 2001; indexValue++) {
+                tooManyRows.add(new FaqRow());
+            }
+            Boolean sizeRejected = false;
+            try {
+                FAQAdminController.importFaqs(tooManyRows);
+            } catch (AuraHandledException error) {
+                sizeRejected = true;
+            }
+            System.assert(sizeRejected);
+
+            List<FaqRow> invalidRows =
+                new List<FaqRow>{
+                    new FaqRow(),
+                    null
+                };
+            FAQImportResult result =
+                FAQAdminController.importFaqs(invalidRows);
+            System.assertEquals(0, result.inserted);
+            System.assertEquals(2, result.failed);
+            System.assertEquals(2, result.errors.size());
         }
     }
 
@@ -209,12 +269,12 @@ private class FAQPortalTest {
         );
     }
 
-    private static FAQAdminController.FaqRow importRow(
+    private static FaqRow importRow(
         String question,
         String answer,
         String category
     ) {
-        FAQAdminController.FaqRow row = new FAQAdminController.FaqRow();
+        FaqRow row = new FaqRow();
         row.question = question;
         row.answer = answer;
         row.category = category;

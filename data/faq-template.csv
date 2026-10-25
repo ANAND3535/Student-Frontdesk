@@ -1,0 +1,6 @@
+Question,Answer,Category,Published
+"How do I reset my password?","Use Forgot Password on the sign-in page and follow the email instructions.",Account,true
+"Where can I view invoices?","Open Billing, then select Invoices.",Billing,true
+"How do I update my contact details?","Open your profile settings and save the changes.",Account,true
+"Which browsers are supported?","Use a current version of Chrome, Edge, Firefox, or Safari.",Technical,true
+"How do I contact student support?","Use the support contact link in your student account.",General,true

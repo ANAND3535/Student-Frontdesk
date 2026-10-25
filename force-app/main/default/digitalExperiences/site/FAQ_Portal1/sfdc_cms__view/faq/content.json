@@ -1,0 +1,78 @@
+{
+  "type": "sfdc_cms__view",
+  "title": "FAQ",
+  "contentBody": {
+    "component": {
+      "children": [
+        {
+          "children": [
+            {
+              "attributes": {
+                "backgroundImageConfig": "",
+                "backgroundImageOverlay": "rgba(0,0,0,0)",
+                "componentSpacerSize": "",
+                "layoutDirectionDesktop": "row",
+                "layoutDirectionMobile": "column",
+                "layoutDirectionTablet": "column",
+                "maxContentWidth": "",
+                "sectionColumnGutterWidth": "",
+                "sectionConfig": "{\"UUID\":\"5da9e441-71d1-4953-8096-68c3e1285a08\",\"columns\":[{\"UUID\":\"fa381675-b710-4bba-b857-828f0df978f3\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
+                "sectionMinHeight": "",
+                "sectionVerticalAlign": "flex-start"
+              },
+              "children": [
+                {
+                  "children": [
+                    {
+                      "attributes": {},
+                      "definition": "c:faqList",
+                      "id": "b9e61048-27b1-4057-a7d6-5f084e62bf24",
+                      "type": "component"
+                    }
+                  ],
+                  "id": "fa381675-b710-4bba-b857-828f0df978f3",
+                  "name": "col1",
+                  "title": "Column 1",
+                  "type": "region"
+                }
+              ],
+              "definition": "community_layout:section",
+              "id": "5da9e441-71d1-4953-8096-68c3e1285a08",
+              "type": "component"
+            }
+          ],
+          "id": "70f8ddf0-0232-4da9-a6a4-7551a117520b",
+          "name": "content",
+          "title": "Content",
+          "type": "region"
+        },
+        {
+          "children": [
+            {
+              "attributes": {
+                "customHeadTags": "",
+                "description": "Browse published FAQ answers.",
+                "pageTitle": "FAQ",
+                "recordId": "{!recordId}"
+              },
+              "definition": "community_builder:seoAssistant",
+              "id": "3a20125a-0914-429f-b20e-843dc613cd08",
+              "type": "component"
+            }
+          ],
+          "id": "78d6d6f1-e216-481b-8fe3-0229f690e2cc",
+          "name": "sfdcHiddenRegion",
+          "title": "sfdcHiddenRegion",
+          "type": "region"
+        }
+      ],
+      "definition": "community_layout:sldsFlexibleLayout",
+      "id": "e79d87d8-6c45-4575-8a67-caf8dcc94632",
+      "type": "component"
+    },
+    "dataProviders": [],
+    "themeLayoutType": "Inner",
+    "viewType": "custom-faq"
+  },
+  "urlName": "faq"
+}

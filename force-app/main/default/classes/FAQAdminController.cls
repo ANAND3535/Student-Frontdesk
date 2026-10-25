@@ -2,33 +2,6 @@
  * Permission-gated API for FAQ administration.
  */
 public with sharing class FAQAdminController {
-    public class FAQSaveResult {
-        @AuraEnabled public FAQ__c faq { get; set; }
-        @AuraEnabled public String warning { get; set; }
-    }
-
-    public class FaqRow {
-        @AuraEnabled public String question { get; set; }
-        @AuraEnabled public String answer { get; set; }
-        @AuraEnabled public String category { get; set; }
-        @AuraEnabled public Boolean published { get; set; }
-        @AuraEnabled public Decimal displayOrder { get; set; }
-    }
-
-    public class ImportResult {
-        @AuraEnabled public Integer inserted { get; set; }
-        @AuraEnabled public Integer failed { get; set; }
-        @AuraEnabled public List<String> errors { get; set; }
-        @AuraEnabled public List<String> warnings { get; set; }
-
-        public ImportResult() {
-            inserted = 0;
-            failed = 0;
-            errors = new List<String>();
-            warnings = new List<String>();
-        }
-    }
-
     /**
      * Indicates whether the current user has FAQ administration access.
      *
@@ -174,9 +147,9 @@ public with sharing class FAQAdminController {
      * @return Insert counts, row-specific errors, and duplicate warnings.
      */
     @AuraEnabled
-    public static ImportResult importFaqs(List<FaqRow> rows) {
+    public static FAQImportResult importFaqs(List<FaqRow> rows) {
         requireAdmin();
-        ImportResult result = new ImportResult();
+        FAQImportResult result = new FAQImportResult();
         if (rows == null || rows.isEmpty()) {
             throw new AuraHandledException('The import contains no rows.');
         }

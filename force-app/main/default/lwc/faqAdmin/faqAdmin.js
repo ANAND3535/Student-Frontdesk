@@ -116,6 +116,7 @@ export default class FaqAdmin extends LightningElement {
     handleSearchInput(event) {
         this.searchInput = event.target.value;
         window.clearTimeout(this.searchTimer);
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
         this.searchTimer = window.setTimeout(() => {
             this.searchTerm = this.searchInput.trim();
             this.loadRecords();

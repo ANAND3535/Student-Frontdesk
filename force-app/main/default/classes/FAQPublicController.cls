@@ -3,25 +3,6 @@
  */
 public without sharing class FAQPublicController {
     /**
-     * A fixed-field view of a published FAQ.
-     */
-    public class FAQDto {
-        @AuraEnabled public Id id { get; set; }
-        @AuraEnabled public String question { get; set; }
-        @AuraEnabled public String answer { get; set; }
-        @AuraEnabled public String category { get; set; }
-        @AuraEnabled public Decimal displayOrder { get; set; }
-
-        public FAQDto(FAQ__c record) {
-            id = record.Id;
-            question = record.Question__c;
-            answer = record.Answer__c;
-            category = record.Category__c;
-            displayOrder = record.Display_Order__c;
-        }
-    }
-
-    /**
      * Returns published FAQs only, exposing fixed read-only fields to guests.
      * System context is safe here because this endpoint cannot write and its
      * query always enforces publication and selects only public FAQ content.

@@ -1,0 +1,78 @@
+{
+  "type": "sfdc_cms__view",
+  "title": "Home",
+  "contentBody": {
+    "component": {
+      "children": [
+        {
+          "children": [
+            {
+              "attributes": {
+                "backgroundImageConfig": "",
+                "backgroundImageOverlay": "rgba(0,0,0,0)",
+                "componentSpacerSize": "",
+                "layoutDirectionDesktop": "row",
+                "layoutDirectionMobile": "column",
+                "layoutDirectionTablet": "column",
+                "maxContentWidth": "",
+                "sectionColumnGutterWidth": "",
+                "sectionConfig": "{\"UUID\":\"11ae7347-270d-4d7d-a21f-13e582cc9501\",\"columns\":[{\"UUID\":\"c0ce6989-d63a-49e2-bfb7-5133b57fdb9d\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
+                "sectionMinHeight": "",
+                "sectionVerticalAlign": "flex-start"
+              },
+              "children": [
+                {
+                  "children": [
+                    {
+                      "attributes": {},
+                      "definition": "c:faqHome",
+                      "id": "6bfe5c11-e90e-4f26-884a-7ed4340f5d00",
+                      "type": "component"
+                    }
+                  ],
+                  "id": "c0ce6989-d63a-49e2-bfb7-5133b57fdb9d",
+                  "name": "col1",
+                  "title": "Column 1",
+                  "type": "region"
+                }
+              ],
+              "definition": "community_layout:section",
+              "id": "11ae7347-270d-4d7d-a21f-13e582cc9501",
+              "type": "component"
+            }
+          ],
+          "id": "ccd095ff-4212-41e8-9adb-3eab83455a5d",
+          "name": "content",
+          "title": "Content",
+          "type": "region"
+        },
+        {
+          "children": [
+            {
+              "attributes": {
+                "customHeadTags": "",
+                "description": "Frequently asked questions and answers.",
+                "pageTitle": "Help Center",
+                "recordId": "{!recordId}"
+              },
+              "definition": "community_builder:seoAssistant",
+              "id": "d135dac0-a864-492d-96dc-7cc9759b3908",
+              "type": "component"
+            }
+          ],
+          "id": "41f6bca5-2614-47a0-a44c-5ce26f609451",
+          "name": "sfdcHiddenRegion",
+          "title": "sfdcHiddenRegion",
+          "type": "region"
+        }
+      ],
+      "definition": "community_layout:sldsFlexibleLayout",
+      "id": "f7200cad-06be-4083-9d10-d3f17802b52a",
+      "type": "component"
+    },
+    "dataProviders": [],
+    "themeLayoutType": "Inner",
+    "viewType": "home"
+  },
+  "urlName": "home"
+}

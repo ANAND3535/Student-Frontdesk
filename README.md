@@ -1,58 +1,99 @@
-# Salesforce DX Project
+# Salesforce FAQ Portal
 
-Salesforce DX is a development approach that brings source-driven development, team collaboration, and continuous integration to the Salesforce Platform. Instead of working directly in an org through a web browser, you work with metadata as source files in a local DX project, track changes in version control, and deploy through automated processes.
+## Architecture
 
-This project template gets you started with the tools and structure you need to build Salesforce applications using source control, scratch orgs, and the Salesforce CLI.
+```text
+Public visitor
+    |
+    v
+Experience Cloud LWR: Home (/) ---> faqHome
+    |                                  |-- FAQ (/faq) ---> faqList
+    |                                  `-- Admin (/admin, login required) ---> faqAdmin
+    |                                                                       |-- faqAdminForm
+    |                                                                       `-- faqCsvImport
+    v
+FAQPublicController (read-only, published records only)
 
-## Prerequisites
+Authenticated FAQ administrator
+    |
+    v
+FAQAdminController -- FAQ_Admin_Access custom permission -- FAQ_Admin permission set
+    |
+    v
+FAQ__c (Private sharing; Question, Answer, Category, Published, Display Order)
+```
 
-Before you start, make sure you have:
+The guest profile has Apex access only to `FAQPublicController`; it has no `FAQ__c`
+object permissions. The public controller runs read-only in system context, selects
+fixed FAQ fields, filters to published rows, orders them, and caps responses at 500.
+Admin controller queries and DML use user mode and `Security.stripInaccessible`.
 
-- **Salesforce CLI** - Download from [developer.salesforce.com/tools/salesforcecli](https://developer.salesforce.com/tools/salesforcecli). See [Install Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm) for details.
-- **VS Code with Salesforce Extension Pack** - See [Installation Instructions](https://developer.salesforce.com/docs/platform/sfvscode-extensions/guide/install.html) for details. Includes the Agentforce Vibes extension.
-- **A development org** - Sign up for a free Developer Edition org [here](https://developer.salesforce.com/signup).
-- **Dev Hub enabled** (optional, required to create scratch orgs) - You can enable Dev Hub in your development org under Setup > Dev Hub.  See [Provide Developers Access to Salesforce DX Tools](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_setup_dx_tools.htm).
+## Salesforce metadata
 
-## Project Structure
+- `FAQ__c` uses an auto-number name (`FAQ-{0000}`) and Private sharing.
+- Required question and rich-text answer fields are validated by object metadata and
+  `FAQService`; categories are General, Account, Billing, Technical, and Other.
+- Salesforce does not allow the `required` attribute on an HTML (rich-text) field.
+  The answer is therefore enforced by the validation rule, admin form, and Apex
+  service, including whitespace-only content.
+- `FAQ_Admin_Access` gates writes. `FAQ_Admin` grants FAQ CRUD/field access, Apex
+  class access, the custom permission, and the FAQ tab.
+- `FAQPublicController` serves public FAQ cards. `FAQAdminController` handles
+  authorized search, save, publication, delete, category, and partial CSV import.
+  `FAQService` trims/validates records and reports case-insensitive duplicate
+  warnings. `FAQPortalTest` covers guest/public filtering and admin access/workflows.
 
-Your DX project follows this structure:
+## Components
 
-- **`force-app/main/default/`** - Your metadata source files live in this default package directory. You can configure additional package directories in the `sfdx-project.json` file.
-- **`config/`** - Scratch org definitions and project settings
-- **`scripts/`** - Automation scripts for common tasks
-- **`sfdx-project.json`** - Project manifest that defines package directories, namespace, API version, and other project-level settings
+- `faqHome`: Help Center hero and FAQ/Admin links.
+- `faqList`: public search, category chips, accessible accordion, 60-second refresh.
+- `faqAdmin`: access gate, search/filter, table, edit/delete/publish actions.
+- `faqAdminForm`: validated FAQ editor.
+- `faqCsvImport`: UTF-8 CSV parser, preview, row results, and template download.
 
-See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm).
+## Live site
 
-## Get Started
+- Home: https://orgfarm-0bc0fdebdb-dev-ed.develop.my.site.com/faqportal/
+- FAQ: https://orgfarm-0bc0fdebdb-dev-ed.develop.my.site.com/faqportal/faq
+- Admin: https://orgfarm-0bc0fdebdb-dev-ed.develop.my.site.com/faqportal/admin
+- Org alias: `faqorg2`
 
-Ready to start developing? The [Get Started with Salesforce DX](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_get_started_dx.htm) guide walks you through your first project, from creating a scratch org to creating a simple Apex class or LWC to deploying your code to a sandbox.
+## Adding FAQs
 
-## Common Salesforce CLI Commands
+1. Sign in to the Admin route as a Salesforce user assigned the `FAQ_Admin`
+   permission set and granted access to the FAQ Portal site.
+2. Select **New FAQ**, fill in the question and rich-text answer, choose a category
+   and display order, then select **Published** if it should appear publicly.
+3. To add multiple entries, choose **Import CSV**, download the template, fill the
+   `Question,Answer,Category,Published` columns, upload it, inspect the preview,
+   then select **Import**. Imports accept up to 2,000 rows and report row errors.
+4. Public users can see only published answers on the FAQ route. The page refreshes
+   periodically and when a visitor returns to the browser tab.
 
-Here are common CLI commands that you'll use the most:
+The import template is [data/faq-template.csv](./data/faq-template.csv). Seed data
+can be loaded with `sf apex run --file scripts/apex/seed-faqs.apex --target-org faqorg2`;
+the script inserts 12 example FAQs only when fewer than five published records exist.
 
-- `sf org login web`: Authorize an org
-- `sf org open`: Open your org in a browser
-- `sf org create scratch`: Create a scratch org
-- `sf project deploy start`: Deploy metadata to your org
-- `sf project retrieve start`: Retrieve metadata from your org
-- `sf template generate <artifact>`: Scaffold new components, such as Apex classes and triggers, LWC components, Lightning apps, and more
-- `sf apex <command>`: Run Apex tests, run anonymous Apex blocks, and view logs
-- `sf data <command>`: Work with test data
-- `sf alias <command>`: Manage org aliases
-- `sf config <command>`: Configure CLI settings
+## Deploy and test
 
-## Use Agentforce Vibes to Build Lightning Apps
+```powershell
+sf project deploy start --source-dir force-app --target-org faqorg2
+sf apex run test --test-level RunLocalTests --code-coverage --result-format human --wait 15 --target-org faqorg2
+sf community publish --name "FAQ Portal" --target-org faqorg2
+```
 
-Transform your ideas into custom Lightning apps that extend CRM workflows directly in Lightning Experience. Through natural conversations with Agentforce Vibes, implement custom objects and fields, complex business logic, and dynamic UI components. See [Build a Lightning App Using Agentforce Vibes](https://developer.salesforce.com/docs/platform/einstein-for-devs/guide/lexapp-overview.html).
+For repeatable smoke checks, run
+`sf apex run --file scripts/apex/verify-public-count.apex --target-org faqorg2`
+and, as the assigned admin,
+`sf apex run --file scripts/apex/verify-admin-flow.apex --target-org faqorg2`.
 
-## Additional Resources
+## Troubleshooting
 
-- [Agentforce Vibes Developer Guide](https://developer.salesforce.com/docs/platform/einstein-for-devs/guide/einstein-overview.html)
-- [Salesforce CLI Installation Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/)
-- [Salesforce CLI Plugin Development Guide](https://developer.salesforce.com/docs/platform/salesforce-cli-plugin/guide/conceptual-overview.html)
-- [Salesforce VS Code Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-
+- If the FAQ route is empty, verify records have **Published** selected and run
+  `sf data query --query "SELECT COUNT() FROM FAQ__c WHERE Is_Published__c = true" --target-org faqorg2`.
+- If the Admin route denies access, assign `FAQ_Admin` and confirm the site has the
+  admin profile/permission set as members.
+- If public FAQ loading fails, verify the site's guest profile grants Apex class
+  access to `FAQPublicController`; do not grant guests CRUD on `FAQ__c`.
+- For local LWC Jest tests and linting, install the project dependencies with
+  `npm install`, then run `npm test` and `npm run lint`.
