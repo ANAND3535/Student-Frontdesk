@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Published_FAQs</fullName>
+    <columns>NAME</columns>
+    <columns>Question__c</columns>
+    <columns>Category__c</columns>
+    <columns>Display_Order__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Is_Published__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>Published FAQs</label>
+</ListView>
